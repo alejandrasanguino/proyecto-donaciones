@@ -1,0 +1,637 @@
+// donaciones.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream> // Para el manejo de cout
+#include <string>
+
+using namespace std;
+
+//Estructuras
+struct Usuarios
+{
+	int id;
+	string Nombre;
+	string Apellido;
+	string nick;
+	string password;
+};
+
+struct Tipo_Centro{
+	int Id_Tipo_Centro;
+	string Descripcion;
+};
+
+struct Centros{
+	int Id_Centro;
+	string Nombre;
+	int Telefono;
+	int Id_Tipo_Centro;
+	string Encargado;
+	int Telefono_Enc;
+};
+
+struct Tipo_Donacion{
+	int Id_Tipo_Donacion;
+	string Descripcion;
+};
+
+struct Donaciones
+{
+	int Id_Donacion;
+	int Id_Tipo_Donacion;
+	int Id_Centro;
+	int Id_Usuario;
+	string Fecha;
+	string Descripcion;
+	int Cantidad;
+};
+
+//Fuinciones del proyecto
+void menuPrincipal();
+//metodos utilizados en la opcion 1
+void crearArchivos();
+void datosIniciales();
+//Metodo utilizado en la opcion 2
+void altaUsuario();
+//metodo utilizado en la opcion 3
+void menuAdministrar();
+//Llamadas desde el menu Administrar Parametros
+void menuUsuarios();
+void menuCentros();
+void menuTiposDonacion();
+
+void iniciarSesion(string usuario, string password);
+void menuOperaciones();
+
+//Donaciones
+void menuDonaciones();
+void altaDonacion();
+void consultaDonaciones(int idUsuario);
+
+//Tipo de Donaciones
+void consulta_TipoDonacion();
+
+
+
+//Funcion Principal
+int main()
+{
+	menuPrincipal();
+	return 0;
+}
+
+//Detalle de Funciones
+void menuPrincipal(){
+	int op;
+	string usuario,password;
+
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"======                  Menu Principal                 ======"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"1 .- Crear Archivos "<<endl;
+		cout<<"2 .- Iniciar Sesion "<<endl;
+		cout<<"3 .- Salir"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"Elija la opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			crearArchivos();
+			datosIniciales();
+			break;
+		case 2:
+			cout<<"Ingrese su Usuario  > ";
+			cin>>usuario;
+			cout<<"Ingrese su Password > ";
+			cin>>password;
+			iniciarSesion(usuario,password);
+			break;
+		}
+	}while(op!=3);
+}
+
+void crearArchivos()
+{
+	cout<<"Creando Archivos del sistema..."<<endl;
+	FILE *usu, *don, *tipdon, *tipcen, *cen;
+	usu = fopen("Usuarios.dat", "wb");
+	tipdon = fopen("TipoDonacion.dat", "wb");
+	don = fopen("Donacion.dat", "wb");
+	tipcen = fopen("TipoCentro.dat", "wb");
+	cen = fopen("Centros.dat", "wb");
+	if (usu != NULL && tipdon != NULL && don != NULL && tipcen != NULL && cen != NULL)
+	{
+		for(int i=0;i<50;i++){
+			cout<<".";
+		}
+		cout<<endl;
+		cout << "1.-Usuarios.dat" << endl;
+		for(int i=0;i<50;i++){
+			cout<<".";
+		}
+		cout<<endl;
+		cout << "2.-TipoDonacion.dat" << endl;
+		for(int i=0;i<50;i++){
+			cout<<".";
+		}
+		cout<<endl;
+		cout << "3.-Donacion.dat" << endl;
+		for(int i=0;i<50;i++){
+			cout<<".";
+		}
+		cout<<endl;
+		cout << "4.-TipoCentro.dat" << endl;
+		for(int i=0;i<50;i++){
+			cout<<".";
+		}
+		cout<<endl;
+		cout << "5.-Centros.dat" << endl;
+		cout << "Los archivos se han creado correctamente.!" << endl;
+	}
+	else
+	{
+		cout << "Error, Los Archivos no pudieron crearse!!!" << endl;
+	}
+	fclose(usu);
+	fclose(tipdon);
+	fclose(don);
+	fclose(tipcen);
+	fclose(cen);
+}
+
+void datosIniciales(){
+	long dir_fisica;
+	int id;
+	cout<<"Cargando datos iniciales..."<<endl;
+	//Datos de Usuario genérico
+	FILE *ptr;
+	Usuarios usu;
+	ptr=fopen("Usuarios.dat","ab");
+	fread(&usu,sizeof(usu),1,ptr);
+	if(ptr==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+		_gettch();
+	}else{
+		id=1;
+		dir_fisica = id * sizeof(usu); // Calculo de la dir. fisica
+		fseek(ptr, dir_fisica, SEEK_SET); //Posicionar el apuntador del archivo
+		usu.id=id;
+		usu.Nombre="Alejandra";
+		usu.Apellido="Sanguino";
+		usu.nick="alesan";
+		usu.password="123456";
+		fseek(ptr, dir_fisica, SEEK_SET); //Posicionar el apuntador del archivo
+		fwrite(&usu,sizeof(usu),1,ptr);
+	}
+	cout<<"   ========     Usuario registrado!!     =======  "<<endl;
+	fclose(ptr);
+	
+//Datos para tipos de centros de acogida
+	FILE *ptr1;
+	Tipo_Centro tipcen;
+	ptr1=fopen("TipoCentro.dat","ab");
+	fread(&tipcen,sizeof(tipcen),1,ptr1);
+	if(ptr1==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+		_gettch();
+	}else{
+		tipcen.Id_Tipo_Centro=1;
+		tipcen.Descripcion="Hogar";
+		fwrite(&tipcen,sizeof(tipcen),1,ptr1);
+		tipcen.Id_Tipo_Centro=2;
+		tipcen.Descripcion="Albergue";
+		fwrite(&tipcen,sizeof(tipcen),1,ptr1);
+	}
+	cout<<"   ========     Tipo de Centros registrados!!     =======  "<<endl;
+	fclose(ptr1);
+
+//Datos para centros de acogida
+	FILE *ptr2;
+	Centros cen;
+	ptr2=fopen("Centros.dat","ab");
+	fread(&cen,sizeof(cen),1,ptr2);
+	if(ptr2==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+		_gettch();
+	}else{
+		cen.Id_Centro=1;
+		cen.Nombre="SOS";
+		cen.Telefono=3535353;
+		cen.Id_Tipo_Centro=1;
+		cen.Encargado="Alejandra";
+		cen.Telefono_Enc=3303030;
+		fwrite(&cen,sizeof(cen),1,ptr2);
+	}
+	cout<<"   ========     Centros registrados!!     =======  "<<endl;
+	fclose(ptr2);
+
+//Datos para tipos de donacion
+	FILE *ptr3;
+	Tipo_Donacion tipdon;
+	ptr3=fopen("TipoDonacion.dat","ab");
+	fread(&tipdon,sizeof(tipdon),1,ptr3);
+	if(ptr3==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+		_gettch();
+	}else{
+		tipdon.Id_Tipo_Donacion=1;
+		tipdon.Descripcion="Economica";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+		tipdon.Id_Tipo_Donacion=2;
+		tipdon.Descripcion="Ropa";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+		tipdon.Id_Tipo_Donacion=3;
+		tipdon.Descripcion="Alimentos";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+		tipdon.Id_Tipo_Donacion=4;
+		tipdon.Descripcion="Medicamentos";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+		tipdon.Id_Tipo_Donacion=5;
+		tipdon.Descripcion="Muebles";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+		tipdon.Id_Tipo_Donacion=6;
+		tipdon.Descripcion="Otros";
+		fwrite(&tipdon,sizeof(tipdon),1,ptr3);
+	}
+	cout<<"   ========     Tipos de donacion registrados!!     =======  "<<endl;
+	fclose(ptr3);
+
+//Datos para donaciones
+
+	FILE *ptr4;
+	Donaciones don;
+	ptr4=fopen("Donacion.dat","ab");
+	fread(&don,sizeof(don),1,ptr4);
+	if(ptr4==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+		_gettch();
+	}else{
+		don.Id_Donacion=1;
+		don.Id_Tipo_Donacion=1;
+		don.Id_Centro=1;
+		don.Id_Usuario=1;
+		don.Fecha="20/10/2017";
+		don.Descripcion="Bs";
+		don.Cantidad=500;
+		fwrite(&don,sizeof(don),1,ptr4);
+	}
+	cout<<"   ========     Tipos de donacion registrados!!     =======  "<<endl;
+	fclose(ptr4);
+	
+}
+
+void iniciarSesion(string usuario, string password){
+	system("cls");
+	FILE *ptr;
+	Usuarios reg;
+	ptr=fopen("Usuarios.dat","rb");
+	fread(&reg, sizeof(reg), 1, ptr);
+	while (!feof(ptr)) // Ciclo mientras no se encuentre el final del archivo
+	{
+		if ((reg.nick == usuario) && (reg.password == password)){
+			cout<<"============================================================="<<endl;
+			cout<<"\tHola "<<reg.Nombre + " " + reg.Apellido<<endl;
+			cout<<"============================================================="<<endl;
+			fread(&reg, sizeof(reg), 1, ptr);
+			menuOperaciones();
+		} else {
+			cout<<"El usuario no existe..."<<endl;
+			break;
+		}
+	}
+}
+
+void menuAdministrar(){
+	int op;
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"======         Menu Administar Parametros              ======"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"1 .- Usuarios"<<endl;
+		cout<<"2 .- Tipos de Centros / Centros"<<endl;
+		cout<<"3 .- Tipos de Donacion"<<endl;
+		cout<<"4 .- Volver"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"Elija la opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			menuUsuarios();
+			break;
+		case 2:
+			menuCentros();
+			break;
+		case 3:
+			menuTiposDonacion();
+			break;
+		case 4:
+			menuOperaciones();
+			break;
+		}
+	}while(op!=4);
+}
+
+void menuUsuarios(){
+	int op;
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"======          Menu Administar Usuarios               ======"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"1 .- Alta de Usuarios"<<endl;
+		cout<<"2 .- Baja de Usuarios"<<endl;
+		cout<<"3 .- Modificacion de Usuarios"<<endl;
+		cout<<"4 .- Consulta de Usuarios"<<endl;
+		cout<<"5 .- Volver"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"Elija la opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			altaUsuario();
+			break;
+		case 2:
+			//bajaUsuario();
+			break;
+		case 3:
+			//modificaUsuario();
+			break;
+		case 4:
+			//consultaUsuario();
+			break;
+		case 5:
+			menuAdministrar();
+			break;
+		}
+	}while(op!=5);
+}
+
+void menuCentros(){
+	int op;
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"======  Menu Administar Tipos de Centros / Centros     ======"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"  Administar Tipos de Centros"<<endl;
+		cout<<"1 .- Alta de Tipos de Centro"<<endl;
+		cout<<"2 .- Baja de Tipos de Centro"<<endl;
+		cout<<"3 .- Modificacion de Tipos de Centro"<<endl;
+		cout<<"4 .- Consulta de Tipos de Centro"<<endl;
+		cout<<"  Administar Centros"<<endl;
+		cout<<"5 .- Alta de Centros"<<endl;
+		cout<<"6 .- Baja de Centros"<<endl;
+		cout<<"7 .- Modificacion de Centros"<<endl;
+		cout<<"8 .- Consulta de Centros"<<endl;
+		cout<<"9 .- Volver"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"Elija la opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			//altaTipoCentro();
+			break;
+		case 2:
+			//bajaTipoCentro();
+			break;
+		case 3:
+			//modificaTipoCentro();
+			break;
+		case 4:
+			//consultaTipoCentro();
+			break;
+		case 5:
+			//altaCentro();
+			break;
+		case 6:
+			//bajaCentro();
+			break;
+		case 7:
+			//modificaCentro();
+			break;
+		case 8:
+			//consultaCentro();
+			break;
+		case 9:
+			menuAdministrar();
+			break;
+		}
+	}while(op!=0);
+}
+
+void menuTiposDonacion(){
+	int op;
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"======      Menu Administar Tipos de Donacion          ======"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"1 .- Alta de Tipos de Donacion"<<endl;
+		cout<<"2 .- Baja de Tipos de Donacion"<<endl;
+		cout<<"3 .- Modificacion de Tipos de Donacion"<<endl;
+		cout<<"4 .- Consulta de Tipos de Donacion"<<endl;
+		cout<<"5 .- Volver"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<"Elija la opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			//altaUsuario();
+			break;
+		case 2:
+			//bajaUsuario();
+			break;
+		case 3:
+			//modificaUsuario();
+			break;
+		case 4:
+			consulta_TipoDonacion();
+			break;
+		case 5:
+			menuAdministrar();
+			break;
+		}
+	}while(op!=5);
+}
+
+void altaUsuario(){
+	long dir_fisica;
+	int id;
+	FILE *ptr;
+	Usuarios reg;
+	ptr = fopen("Usuarios.dat", "ab");
+	
+	fread(&reg,sizeof(reg),1,ptr);
+	cout<<"============================================================="<<endl;
+	cout<<"========                Alta de Usuario              ========"<<endl;
+	cout<<"============================================================="<<endl;
+	if(ptr==NULL){
+		cout<<"El archivo NO Existe "<<endl;
+	}else{
+		
+		cout<<"Ingrese el Id : ";
+		cin>>id;
+		dir_fisica = id * sizeof(reg); // Calculo de la dir. fisica
+		fseek(ptr, dir_fisica, SEEK_SET); //Posicionar el apuntador del archivo
+		fread(&ptr, sizeof(reg), 1, ptr);
+		if(reg.id != id)
+		{
+			cout<<"Ingrese Nombre : ";
+			cin>>reg.Nombre;
+			cout<<"Ingrese Apellido : ";
+			cin>>reg.Apellido;
+			cout<<"Ingrese nombre de usuario : ";
+			cin>>reg.nick;
+			cout<<"Ingrese Password : ";
+			cin>>reg.password;
+			cout<<endl;
+			fseek(ptr, dir_fisica, SEEK_SET); //Posicionar el apuntador del archivo
+			fwrite(&reg,sizeof(reg),1,ptr);
+		} else {
+			cout << "\n\n\n\rEl Id Animal ya existe !!!";
+			cout << "\n\r<<< Oprima cualquier tecla para continuar >>>";
+		}
+	}
+	fclose(ptr);
+}
+
+void consultaDonaciones(int IdUsuario){
+	//system("cls");
+	FILE *ptr;
+	Donaciones don;
+	ptr=fopen("Donaciones.dat","r");
+	cout<<"============================================================="<<endl;
+	cout<<"=========      Registro de ultimas Donaciones       ========="<<endl;
+	cout<<"============================================================="<<endl;
+	cout<<"Id\t"<<"Centro\t"<<"Tipo\t"<<"Fecha\t"<<"Descripcion\t"<<"Cantidad\t"<<endl;
+	cout<<"============================================================="<<endl;
+	fread(&don, sizeof(don), 1, ptr);
+	while (!feof(ptr)) // Ciclo mientras no se encuentre el final del archivo
+	{
+		if(don.Id_Usuario == IdUsuario){
+			cout<<don.Id_Donacion<<"\t"<<don.Id_Centro<<"\t"<<don.Id_Tipo_Donacion<<"\t"<<don.Fecha<<"\t"<<don.Descripcion<<"\t"<<don.Cantidad<<"\t"<<endl;
+			fread(&don, sizeof(don), 1, ptr);
+		}else{
+			cout<<"El usuario no tiene donaciones registradas"<<endl;
+		}
+	}
+	cout<<"============================================================="<<endl;
+	fclose(ptr);
+	_gettch();
+}
+
+
+void menuOperaciones(){
+	int op, id;
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"========               Menu del Proyecto             ========"<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<" 1.- Consultar Donaciones Realizadas "<<endl;
+		cout<<" 2.- Realizar Nueva Donacion "<<endl;
+		cout<<" 3.- Administrar Sistema "<<endl;
+		cout<<" 0.- Salir "<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<" Elija una opcion > ";
+		cin>>op;
+		switch(op){
+		case 1:
+			cout<<"Ingrese id Usuario > ";
+			cin>>id;
+			consultaDonaciones(id);
+			break;
+		case 2:
+			menuDonaciones();
+			break;
+		case 3:
+			menuAdministrar();
+			break;
+		}
+	}while(op!=0);
+}
+
+void menuDonaciones(){
+	system("cls");
+	int op;
+	FILE *ptr;
+	Tipo_Donacion tipdon;
+	ptr = fopen("TipoDonacion.dat","r");
+	fread(&tipdon, sizeof(tipdon), 1, ptr);
+	do{
+		cout<<"============================================================="<<endl;
+		cout<<"========            Menu de Donaciones               ========"<<endl;
+		cout<<"============================================================="<<endl;
+		while (!feof(ptr)) // Ciclo mientras no se encuentre el final del archivo
+		{
+			cout<<" "<<tipdon.Id_Tipo_Donacion<<" .- "<<tipdon.Descripcion<<endl;
+			fread(&tipdon, sizeof(tipdon), 1, ptr);	
+		}
+		cout<<" 7 .- Volver "<<endl;
+		cout<<"============================================================="<<endl;
+		cout<<" Elija una opcion > ";
+		cin>>op;
+		switch(op){
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+				altaDonacion();
+				break;
+			case 7:
+				menuOperaciones();
+				break;
+		}
+	}while(op!=0);
+}
+
+void altaDonacion(){
+	system("cls");
+	FILE *ptr;
+	Donaciones don;
+	ptr = fopen("Donacion.dat","rb+");
+	if(ptr == NULL){
+		cout<<"El archivo no existe..."<<endl;
+		return;
+	}
+	
+	fread(&don, sizeof(don), 1, ptr);
+	cout<<"============================================================="<<endl;
+	cout<<"========             Alta de Donaciones              ========"<<endl;
+	cout<<"============================================================="<<endl;
+	cout<<endl;
+	cout<<" Ingrese el Id de Donacion : ";
+	cin>>don.Id_Donacion;
+	cout<<" Ingrese el Tipo de Donacion : ";
+	cin>>don.Id_Tipo_Donacion;
+	cout<<" Ingrese el Centro : ";
+	cin>>don.Id_Centro;
+	cout<<" Ingrese el Usuario : ";
+	cin>>don.Id_Usuario;
+	cout<<" Ingrese la Fecha de Donacion : ";
+	cin>>don.Fecha;
+	cout<<" Ingrese la Descripcion de la Donacion : ";
+	cin>>don.Descripcion;
+	cout<<" Ingrese la Cantidad de Donacion : ";
+	cin>>don.Cantidad;
+	fwrite(&don, sizeof(don), 1, ptr); // Grabar el Registro completo
+	fclose(ptr);
+}
+
+void consulta_TipoDonacion(){
+	FILE *ptr;
+	Tipo_Donacion tipdon;
+	ptr = fopen("TipoDonacion.dat","r");
+	fread(&tipdon, sizeof(tipdon), 1, ptr);
+	cout<<"============================================================="<<endl;
+	cout<<"========     Consulta de Tipo de Donaciones          ========"<<endl;
+	cout<<"============================================================="<<endl;
+	cout<<"Codigo \t"<<"Descripcion"<<endl;
+	while (!feof(ptr)) // Ciclo mientras no se encuentre el final del archivo
+	{
+		cout<<tipdon.Id_Tipo_Donacion<<"\t"<<tipdon.Descripcion<<endl;
+		fread(&tipdon, sizeof(tipdon), 1, ptr);	
+	}
+	cout<<"============================================================="<<endl;
+	_gettch();
+}
+
