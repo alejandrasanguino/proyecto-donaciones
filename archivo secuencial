@@ -1,0 +1,54 @@
+void altaDonacion(){
+	
+	int donacion;	//variable para comparar con el id del registro dentro del archivo
+	long df;		//calcular la direccion fisica del archivo
+	
+	FILE *ptr;		//puntero al archivo
+	Donaciones don;	//Struct de Donaciones
+	ptr = fopen("Donacion.dat","rb+"); //Apertura del archivo 
+
+	if(ptr == NULL){
+		cout<<"El archivo no existe..."<<endl;
+		_gettch();
+		return;
+	}
+	
+	cout<<"============================================================="<<endl;
+	cout<<"========             Control de Donaciones           ========"<<endl;
+	cout<<"============================================================="<<endl;
+	cout<<"========             Alta de Donaciones              ========"<<endl;
+	cout<<"============================================================="<<endl;
+	cout<<endl;
+
+	cout<<" Ingrese el Id de Donacion : ";
+	cin>>donacion;
+	df = donacion * sizeof(don); // Calculo de la dir. fisica
+	fseek(ptr, df, SEEK_SET); //Posicionar el apuntador del archivo// fseek un puntutero 
+	fread(&don, sizeof(don), 1, ptr);
+
+	if(don.Id_Donacion != donacion){
+		cout<<" Ingrese el Tipo de Donacion : ";
+		cin>>don.Id_Tipo_Donacion;
+		cout<<" Ingrese el Centro : ";
+		cin>>don.Id_Centro;
+		cout<<" Ingrese el Usuario : ";
+		cin>>don.Id_Usuario;
+		cout<<" Ingrese la Fecha de Donacion : ";
+		cin>>don.Fecha;
+		cout<<" Ingrese la Descripcion de la Donacion : ";
+		cin>>don.Descripcion;
+		cout<<" Ingrese la Cantidad de Donacion : ";
+		cin>>don.Cantidad;
+		don.Id_Donacion = donacion;
+		fseek(ptr, df, SEEK_SET);			// Posicionar el apuntador del archivo
+		fwrite(&don, sizeof(don), 1, ptr);	// Grabar el Registro completo
+		fclose(ptr);						// Cierro el archivo fisico
+		cout<<"============================================================="<<endl;
+		cout<<"\n\r\r\rRegistro Guardado!!!"<<endl;
+	}else{
+		cout << "\n\n\n\rEl Id de donacion ya existe !!!";
+		cout << "\n\r<<< Oprima cualquier tecla para continuar >>>";
+		_gettch();
+		return;
+	}
+}
